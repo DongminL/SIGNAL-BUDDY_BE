@@ -57,6 +57,6 @@ public class LikeJobConfig {
     @Bean
     @StepScope
     public RequestLikeWriter requestLikeWriter() {
-        return new RequestLikeWriter(feedbackRepository, likeJdbcRepository, redisTemplate);
+        return new RequestLikeWriter(feedbackRepository, likeJdbcRepository);
     }
 }

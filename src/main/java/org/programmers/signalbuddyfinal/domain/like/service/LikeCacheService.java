@@ -1,6 +1,5 @@
 package org.programmers.signalbuddyfinal.domain.like.service;
 
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.programmers.signalbuddyfinal.domain.like.dto.LikeRequestType;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -13,36 +12,36 @@ public class LikeCacheService {
 
     private final StringRedisTemplate redisTemplate;
 
-    private static final String LIKE_KEY_PREFIX = "like:";
+    public static final String LIKE_PENDING_KEY = "like:pending";
+    public static final String LIKE_PROCESSING_KEY = "like:processing";
 
-    public void addLike(String key) {
-        redisTemplate.opsForValue()
-            .set(key, LikeRequestType.ADD.name(), 3L, TimeUnit.MINUTES);
+    public void addLike(String hashKey) {
+        redisTemplate.opsForHash().put(LIKE_PENDING_KEY, hashKey, LikeRequestType.ADD.name());
     }
 
-    public void cancelLike(String key) {
-        redisTemplate.opsForValue()
-            .set(key, LikeRequestType.CANCEL.name(), 3L, TimeUnit.MINUTES);
+    public void cancelLike(String hashKey) {
+        redisTemplate.opsForHash().put(LIKE_PENDING_KEY, hashKey, LikeRequestType.CANCEL.name());
     }
 
-    public boolean exists(String key) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    public boolean exists(String hashKey) {
+        return Boolean.TRUE.equals(redisTemplate.opsForHash().hasKey(LIKE_PENDING_KEY, hashKey));
     }
 
-    public void delete(String key) {
-        redisTemplate.delete(key);
+    public void delete(String hashKey) {
+        redisTemplate.opsForHash().delete(LIKE_PENDING_KEY, hashKey);
     }
 
-    public String getLikeType(String key) {
-        return redisTemplate.opsForValue().get(key);
+    @Nullable
+    public String getLikeType(String hashKey) {
+        Object value = redisTemplate.opsForHash().get(LIKE_PENDING_KEY, hashKey);
+        if (value == null) {
+            value = redisTemplate.opsForHash().get(LIKE_PROCESSING_KEY, hashKey);
+        }
+        return value != null ? value.toString() : null;
     }
 
     public static String generateKey(Long feedbackId, Long memberId) {
-        return LIKE_KEY_PREFIX + feedbackId + ":" + memberId;
-    }
-
-    public static String getLikeKeyPrefix() {
-        return LIKE_KEY_PREFIX;
+        return feedbackId + ":" + memberId;
     }
 
     @Nullable
