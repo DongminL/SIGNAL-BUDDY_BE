@@ -337,8 +337,8 @@ bootJar {
 // SonarQube 설정
 sonar {
     properties {
-        property "sonar.projectKey", "prgrms-web-devcourse-final-project_WEB2_3_SIGNAL-BUDDY_BE"
-        property "sonar.organization", "prgrms-web-devcourse-final-project"
+        property "sonar.projectKey", "DongminL_SIGNAL-BUDDY_BE"
+        property "sonar.organization", "dongminl"
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.sources', 'src/main/java'
         property 'sonar.tests', 'src/test/java'

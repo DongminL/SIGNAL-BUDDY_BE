@@ -1,7 +1,5 @@
 package org.programmers.signalbuddyfinal.domain.like.batch;
 
-import static org.programmers.signalbuddyfinal.domain.like.service.LikeCacheService.generateKey;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.programmers.signalbuddyfinal.domain.like.dto.LikeUpdateRequest;
 import org.programmers.signalbuddyfinal.domain.like.repository.LikeJdbcRepository;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -22,25 +19,18 @@ public class RequestLikeWriter implements ItemWriter<LikeUpdateRequest> {
 
     private final FeedbackRepository feedbackRepository;
     private final LikeJdbcRepository likeJdbcRepository;
-    private final StringRedisTemplate redisTemplate;
 
     @Transactional
     @Override
     public void write(Chunk<? extends LikeUpdateRequest> chunk) {
         log.info("like job chunk size : {}", chunk.size());
 
-        List<LikeUpdateRequest> savedLikeList = new ArrayList<>();   // 저장할 좋아요 데이터
-        List<LikeUpdateRequest> deletedLikeList = new ArrayList<>(); // 삭제할 좋아요 데이터
-        List<String> likeKeyList = new ArrayList<>(); // Redis에 저장된 좋아요 데이터의 키
+        List<LikeUpdateRequest> savedLikeList = new ArrayList<>();
+        List<LikeUpdateRequest> deletedLikeList = new ArrayList<>();
 
-        // 요청된 좋아요 개수 및 좋아요 데이터 반영
         for (LikeUpdateRequest request : chunk.getItems()) {
-
             Feedback feedback = feedbackRepository.findById(request.getFeedbackId()).orElse(null);
             if (feedback == null) {
-                redisTemplate.delete(
-                    generateKey(request.getFeedbackId(), request.getMemberId())
-                );
                 continue;
             }
 
@@ -52,14 +42,9 @@ public class RequestLikeWriter implements ItemWriter<LikeUpdateRequest> {
                 deletedLikeList.add(request);
                 feedback.decreaseLike();
             }
-
-            likeKeyList.add(
-                generateKey(request.getFeedbackId(), request.getMemberId())
-            );
         }
 
         likeJdbcRepository.saveAllInBatch(savedLikeList);
         likeJdbcRepository.deleteAllByLikeRequestsInBatch(deletedLikeList);
-        redisTemplate.delete(likeKeyList);
     }
 }

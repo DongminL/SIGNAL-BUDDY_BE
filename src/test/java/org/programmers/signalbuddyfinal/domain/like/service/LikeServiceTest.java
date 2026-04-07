@@ -1,6 +1,7 @@
 package org.programmers.signalbuddyfinal.domain.like.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.programmers.signalbuddyfinal.domain.like.service.LikeCacheService.LIKE_PENDING_KEY;
 import static org.programmers.signalbuddyfinal.domain.like.service.LikeCacheService.generateKey;
 
 import org.junit.jupiter.api.AfterEach;
@@ -95,12 +96,10 @@ class LikeServiceTest extends IntegrationTest implements RedisTestContainer {
         likeService.addLike(feedback.getFeedbackId(), user);
 
         // then
-        String deleteLike = redisTemplate.opsForValue()
-            .get(generateKey(feedback.getFeedbackId(), feedbackWriter.getMemberId()));
+        String hashKey = generateKey(feedback.getFeedbackId(), feedbackWriter.getMemberId());
+        String deleteLike = (String) redisTemplate.opsForHash().get(LIKE_PENDING_KEY, hashKey);
         assertThat(deleteLike).isEqualTo("ADD");
-        redisTemplate.delete(
-            generateKey(feedback.getFeedbackId(), feedbackWriter.getMemberId())
-        );
+        redisTemplate.opsForHash().delete(LIKE_PENDING_KEY, hashKey);
     }
 
     @DisplayName("좋아요 추가를 실패한다.")
@@ -135,12 +134,10 @@ class LikeServiceTest extends IntegrationTest implements RedisTestContainer {
         likeService.deleteLike(feedback.getFeedbackId(), user);
 
         // then
-        String deleteLike = redisTemplate.opsForValue()
-            .get(generateKey(feedback.getFeedbackId(), feedbackWriter.getMemberId()));
+        String hashKey = generateKey(feedback.getFeedbackId(), feedbackWriter.getMemberId());
+        String deleteLike = (String) redisTemplate.opsForHash().get(LIKE_PENDING_KEY, hashKey);
         assertThat(deleteLike).isEqualTo("CANCEL");
-        redisTemplate.delete(
-            generateKey(feedback.getFeedbackId(), feedbackWriter.getMemberId())
-        );
+        redisTemplate.opsForHash().delete(LIKE_PENDING_KEY, hashKey);
     }
 
     @DisplayName("좋아요 취소를 실패한다.")
