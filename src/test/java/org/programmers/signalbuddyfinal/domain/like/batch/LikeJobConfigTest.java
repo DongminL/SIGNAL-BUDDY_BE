@@ -55,7 +55,7 @@ class LikeJobConfigTest extends BatchTest implements RedisTestContainer {
     @BeforeEach
     void setup() {
         List<Member> memberList = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             memberList.add(
                 TestMemberFactory.createActiveUser("test" + i + "@test.com", "tester" + i)
             );
