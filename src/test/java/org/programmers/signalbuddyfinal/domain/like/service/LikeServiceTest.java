@@ -22,7 +22,6 @@ import org.programmers.signalbuddyfinal.domain.member.entity.enums.MemberRole;
 import org.programmers.signalbuddyfinal.domain.member.entity.enums.MemberStatus;
 import org.programmers.signalbuddyfinal.domain.member.fixture.TestMemberFactory;
 import org.programmers.signalbuddyfinal.domain.member.repository.MemberRepository;
-import org.programmers.signalbuddyfinal.global.db.RedisTestContainer;
 import org.programmers.signalbuddyfinal.global.dto.CustomUser2Member;
 import org.programmers.signalbuddyfinal.global.exception.BusinessException;
 import org.programmers.signalbuddyfinal.global.security.basic.CustomUserDetails;
@@ -31,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-class LikeServiceTest extends IntegrationTest implements RedisTestContainer {
+class LikeServiceTest extends IntegrationTest {
 
     @Autowired
     private LikeService likeService;

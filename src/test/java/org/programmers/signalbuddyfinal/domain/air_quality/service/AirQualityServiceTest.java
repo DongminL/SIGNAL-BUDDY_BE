@@ -3,6 +3,7 @@ package org.programmers.signalbuddyfinal.domain.air_quality.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -12,20 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.programmers.signalbuddyfinal.domain.air_quality.dto.AirQualityResponse;
 import org.programmers.signalbuddyfinal.domain.air_quality.dto.CachedAirQuality;
 import org.programmers.signalbuddyfinal.global.config.RedisConfig;
-import org.programmers.signalbuddyfinal.global.db.RedisTestContainer;
 import org.programmers.signalbuddyfinal.global.exception.BusinessException;
 import org.programmers.signalbuddyfinal.global.support.IntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-
-import java.io.IOException;
 
 @SpringBootTest
 @Import(RedisConfig.class)
@@ -35,7 +32,7 @@ import java.io.IOException;
     "schedule.air-quality-api.lockAtLeastFor=50m"
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class AirQualityServiceTest extends IntegrationTest implements RedisTestContainer {
+class AirQualityServiceTest extends IntegrationTest {
 
     @Autowired
     private AirQualityService airQualityService;
@@ -75,7 +72,6 @@ public class AirQualityServiceTest extends IntegrationTest implements RedisTestC
     @DisplayName("첫 요청 성공 시 응답 반환 및 캐싱 테스트")
     @Test
     void successRequestTest() {
-        flushRedis();
         createMockWebServer(createResponse());
 
         AirQualityResponse response = airQualityService.getAirQuality();
@@ -90,7 +86,6 @@ public class AirQualityServiceTest extends IntegrationTest implements RedisTestC
     @DisplayName("두 번째 요청 시 캐싱된 데이터 반환")
     @Test
     void successSecondRequestTest() {
-        flushRedis();
         int count = mockWebServer.getRequestCount();
         createMockWebServer(createResponse());
         redisTemplate.opsForValue().set(key, cachedAirQuality);
@@ -107,7 +102,6 @@ public class AirQualityServiceTest extends IntegrationTest implements RedisTestC
     @DisplayName("failBack 실패 테스트")
     @Test
     void failBackRequestTest() {
-        flushRedis();
         createMockWebServer(createFailResponse());
 
         assertThrows(BusinessException.class, () -> airQualityService.getAirQuality());
@@ -116,7 +110,6 @@ public class AirQualityServiceTest extends IntegrationTest implements RedisTestC
     @DisplayName("failBack 성공 테스트")
     @Test
     void failBackSuccessTest() {
-        flushRedis();
         createMockWebServer(createFailResponse());
         redisTemplate.opsForValue().set(key, cachedAirQuality);
         CachedAirQuality before = (CachedAirQuality) redisTemplate.opsForValue().get(key);
@@ -126,13 +119,6 @@ public class AirQualityServiceTest extends IntegrationTest implements RedisTestC
 
         assertThat(after.isFresh()).isFalse();
         assertThat(after.getData()).isEqualTo(before.getData());
-    }
-
-    private void flushRedis() {
-        RedisConnectionFactory factory = redisTemplate.getConnectionFactory();
-        if (factory != null) {
-            factory.getConnection().serverCommands().flushAll();
-        }
     }
 
     private void createMockWebServer(String response) {

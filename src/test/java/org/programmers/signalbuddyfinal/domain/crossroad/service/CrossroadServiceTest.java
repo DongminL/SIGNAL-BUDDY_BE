@@ -17,7 +17,6 @@ import org.programmers.signalbuddyfinal.domain.crossroad.dto.SignalState;
 import org.programmers.signalbuddyfinal.domain.crossroad.entity.Crossroad;
 import org.programmers.signalbuddyfinal.domain.crossroad.exception.CrossroadErrorCode;
 import org.programmers.signalbuddyfinal.domain.crossroad.repository.CrossroadRepository;
-import org.programmers.signalbuddyfinal.global.db.RedisTestContainer;
 import org.programmers.signalbuddyfinal.global.exception.BusinessException;
 import org.programmers.signalbuddyfinal.global.monitoring.HttpRequestManager;
 import org.programmers.signalbuddyfinal.global.support.IntegrationTest;
@@ -25,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class CrossroadServiceTest extends IntegrationTest implements RedisTestContainer {
+class CrossroadServiceTest extends IntegrationTest {
 
     @Autowired
     private CrossroadService crossroadService;
