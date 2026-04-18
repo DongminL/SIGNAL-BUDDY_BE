@@ -20,7 +20,6 @@ import org.programmers.signalbuddyfinal.domain.member.entity.enums.MemberRole;
 import org.programmers.signalbuddyfinal.domain.member.entity.enums.MemberStatus;
 import org.programmers.signalbuddyfinal.domain.member.fixture.TestMemberFactory;
 import org.programmers.signalbuddyfinal.domain.member.repository.MemberRepository;
-import org.programmers.signalbuddyfinal.global.db.RedisTestContainer;
 import org.programmers.signalbuddyfinal.global.dto.CustomUser2Member;
 import org.programmers.signalbuddyfinal.global.security.basic.CustomUserDetails;
 import org.programmers.signalbuddyfinal.global.support.BatchTest;
@@ -30,7 +29,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class LikeJobConfigTest extends BatchTest implements RedisTestContainer {
+class LikeJobConfigTest extends BatchTest {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
