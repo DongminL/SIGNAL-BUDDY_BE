@@ -17,7 +17,7 @@ public abstract class JdbcTest implements MariaDBTestContainer {
     private DataInitializer dataInitializer;
 
     @BeforeEach
-    void delete() {
+    void reset() {
         dataInitializer.clear();
     }
 }

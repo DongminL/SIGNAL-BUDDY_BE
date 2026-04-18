@@ -17,7 +17,7 @@ public abstract class RepositoryTest implements MariaDBTestContainer {
     private DataInitializer dataInitializer;
 
     @BeforeEach
-    void delete() {
+    void reset() {
         dataInitializer.clear();
     }
 }

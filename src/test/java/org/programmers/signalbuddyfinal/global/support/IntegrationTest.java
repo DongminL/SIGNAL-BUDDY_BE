@@ -19,7 +19,7 @@ public abstract class IntegrationTest implements MariaDBTestContainer, RedisTest
     private DataInitializer dataInitializer;
 
     @BeforeEach
-    void delete() {
+    void reset() {
         dataInitializer.clear();
         flushRedis();
     }
