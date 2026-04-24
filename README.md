@@ -73,17 +73,14 @@
 
 <aside>
 
-- I**DE** : IntelliJ IEDA
+- **Back-end** : Java 17, Spring Boot 3.4.0, Spring Batch, FCM
+- **Data Access** : Spring Data JPA, QueryDSL, Spring Data JDBC
+- **Authentication** & **Authorization** : Spring Security, JWT, OAuth 2.0
 - **DB** : MariaDB 11.5.2, Redis 7.4.1
-- **Backend** : Spring Boot 3.4.0, Java 17
-- **Data Access** : JPA, QueryDSL, JDBC
-- **Authentication** & **Authorization** : Spring Security, Session
-- **DevOps** : Docker, GitHub Actions
-- **Communication** : Notion, Slack, ZEP
-- **Build Tool** : Gradle
-- **Mapping** : MapStruct 1.6.3
-- **Template Engine** : Thymeleaf
-- **Test** : JUnit5, TestContainers
+- **DevOps** : AWS, Nginx, Docker, GitHub Actions, Sonar Cloud, JaCoCo, Grafana, Prometheus
+- **Test** : JUnit5, Mockito, TestContainers, Spring Rest Docs
+- **Build** : Gradle
+- **Tools** : GitHub, Notion, Slack, ZEP, Swagger, Figma
 </aside>
 
 ---
