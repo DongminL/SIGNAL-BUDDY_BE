@@ -9,6 +9,9 @@ import org.programmers.signalbuddyfinal.domain.like.exception.LikeErrorCode;
 import org.programmers.signalbuddyfinal.domain.like.repository.LikeRepository;
 import org.programmers.signalbuddyfinal.global.dto.CustomUser2Member;
 import org.programmers.signalbuddyfinal.global.exception.BusinessException;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,11 @@ public class LikeService {
     private final LikeCacheService likeCacheService;
 
     @Transactional
+    @Retryable(
+        retryFor = RedisConnectionFailureException.class,
+        maxAttempts = 5,
+        backoff = @Backoff(delay = 500, multiplier = 2.0)
+    )
     public void addLike(Long feedbackId, CustomUser2Member user) {
         String key = generateKey(feedbackId, user.getMemberId());
 
@@ -38,6 +46,11 @@ public class LikeService {
         likeCacheService.addLike(key);
     }
 
+    @Retryable(
+        retryFor = RedisConnectionFailureException.class,
+        maxAttempts = 5,
+        backoff = @Backoff(delay = 500, multiplier = 2.0)
+    )
     public LikeExistResponse existsLike(Long feedbackId, CustomUser2Member user) {
         String key = generateKey(feedbackId, user.getMemberId());
         String cachedValue = likeCacheService.getLikeType(key);
@@ -50,6 +63,11 @@ public class LikeService {
     }
 
     @Transactional
+    @Retryable(
+        retryFor = RedisConnectionFailureException.class,
+        maxAttempts = 5,
+        backoff = @Backoff(delay = 500, multiplier = 2.0)
+    )
     public void deleteLike(Long feedbackId, CustomUser2Member user) {
         String key = generateKey(feedbackId, user.getMemberId());
 

@@ -1,0 +1,12 @@
+{
+  "name": "signal-buddy-loadtest",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.54.0",
+    "esbuild": "^0.20.0"
+  }
+}

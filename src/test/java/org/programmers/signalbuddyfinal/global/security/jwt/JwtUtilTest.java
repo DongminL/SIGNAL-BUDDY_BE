@@ -275,14 +275,14 @@ class JwtUtilTest {
         jwtUtil.addBlackListExistingAccessToken(stubAccessToken, expiration);
 
         // then
-        verify(redisTemplate.opsForValue()).set(
+        verify(valueOperations).set(
             eq("pending-blacklist:access-token:" + stubAccessToken),
             eq("pending"),
             eq(5l),
             eq(TimeUnit.MINUTES)
         );
 
-        verify(redisTemplate.opsForValue()).set(
+        verify(valueOperations).set(
             eq("blacklist:access-token:" + stubAccessToken),
             eq(expiration.toString()),
             eq(Duration.between(new Date().toInstant(), expiration.toInstant()).getSeconds()),

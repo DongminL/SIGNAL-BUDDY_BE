@@ -57,3 +57,8 @@ logs/
 
 ### GitHub Actions Locally Secrets ###
 .secrets
+
+### K6 ###
+loadtest/node_modules/
+loadtest/dist/
+loadtest/results/

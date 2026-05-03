@@ -1,6 +1,5 @@
 package org.programmers.signalbuddyfinal.global.config;
 
-import org.programmers.signalbuddyfinal.domain.air_quality.dto.CachedAirQuality;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

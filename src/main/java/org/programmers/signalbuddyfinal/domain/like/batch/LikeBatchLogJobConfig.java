@@ -68,13 +68,19 @@ public class LikeBatchLogJobConfig {
         return new JdbcPagingItemReaderBuilder<BatchExecutionId>()
             .name("executionPagingReader")
             .dataSource(dataSource)
-            .selectClause("SELECT STEP_EXECUTION_ID, JOB_EXECUTION_ID")
-            .fromClause("FROM BATCH_STEP_EXECUTION")
-            .whereClause("WHERE STEP_NAME IN ('updateLikeBatch', 'deleteLikeLogBatch') "
-                + "AND START_TIME < :threshold")
+            .selectClause("SELECT s.STEP_EXECUTION_ID, s.JOB_EXECUTION_ID, j.JOB_INSTANCE_ID")
+            .fromClause(
+                "FROM BATCH_STEP_EXECUTION s "
+                    + "JOIN BATCH_JOB_EXECUTION j "
+                    + "ON s.JOB_EXECUTION_ID = j.JOB_EXECUTION_ID"
+            )
+            .whereClause(
+                "WHERE s.STEP_NAME IN ('updateLikeBatch', 'deleteLikeLogBatch') "
+                    + "AND s.START_TIME < :threshold"
+            )
             .parameterValues(Map.of("threshold",
                 LocalDateTime.now().minusMinutes(Long.parseLong(expiredMinutes))))
-            .sortKeys(Map.of("STEP_EXECUTION_ID", Order.ASCENDING))
+            .sortKeys(Map.of("s.STEP_EXECUTION_ID", Order.ASCENDING))
             .pageSize(CHUNK_SIZE)
             .rowMapper(new BeanPropertyRowMapper<>(BatchExecutionId.class))
             .build();
@@ -92,9 +98,13 @@ public class LikeBatchLogJobConfig {
             batchJdbcRepository.deleteAllByStepExecutionIdInBatch(
                 "BATCH_STEP_EXECUTION", executionIds);
             batchJdbcRepository.deleteAllByJobExecutionIdInBatch(
+                "BATCH_JOB_EXECUTION_PARAMS", executionIds);
+            batchJdbcRepository.deleteAllByJobExecutionIdInBatch(
                 "BATCH_JOB_EXECUTION_CONTEXT", executionIds);
             batchJdbcRepository.deleteAllByJobExecutionIdInBatch(
                 "BATCH_JOB_EXECUTION", executionIds);
+            batchJdbcRepository.deleteAllByJobInstanceIdInBatch(
+                "BATCH_JOB_INSTANCE", executionIds);
         };
     }
 }
