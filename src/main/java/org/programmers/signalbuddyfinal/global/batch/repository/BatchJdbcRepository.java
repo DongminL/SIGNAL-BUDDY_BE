@@ -1,17 +1,16 @@
 package org.programmers.signalbuddyfinal.global.batch.repository;
 
-import groovy.util.logging.Slf4j;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.programmers.signalbuddyfinal.global.batch.dto.BatchExecutionId;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-@lombok.extern.slf4j.Slf4j
 @Slf4j
 @Repository
 @RequiredArgsConstructor
