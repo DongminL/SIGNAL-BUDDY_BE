@@ -92,6 +92,8 @@ public class LikeBatchLogJobConfig {
             batchJdbcRepository.deleteAllByStepExecutionIdInBatch(
                 "BATCH_STEP_EXECUTION", executionIds);
             batchJdbcRepository.deleteAllByJobExecutionIdInBatch(
+                "BATCH_JOB_EXECUTION_PARAMS", executionIds);
+            batchJdbcRepository.deleteAllByJobExecutionIdInBatch(
                 "BATCH_JOB_EXECUTION_CONTEXT", executionIds);
             batchJdbcRepository.deleteAllByJobExecutionIdInBatch(
                 "BATCH_JOB_EXECUTION", executionIds);
