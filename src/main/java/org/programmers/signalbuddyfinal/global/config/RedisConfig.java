@@ -1,10 +1,13 @@
 package org.programmers.signalbuddyfinal.global.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import java.util.HashSet;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,50 +15,73 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@Profile("!test")
-@EnableRedisRepositories
 @Configuration
+@Profile("!test")
+@EnableRetry
+@EnableRedisRepositories
 @EnableTransactionManagement
+@RequiredArgsConstructor
 public class RedisConfig {
 
-    @Value("${spring.data.redis.host}")
-    private String redisHost;
-
-    @Value("${spring.data.redis.port}")
-    private String redisPort;
-
-    @Value("${spring.data.redis.password}")
-    private String redisPassword;
+    private final RedisProperties redisProperties;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName(redisHost);
-        redisStandaloneConfiguration.setPort(Integer.parseInt(redisPort));
+        RedisProperties.Sentinel sentinelProps = redisProperties.getSentinel();
+        if (sentinelProps != null
+                && sentinelProps.getMaster() != null && !sentinelProps.getMaster().isEmpty()
+                && sentinelProps.getNodes() != null && !sentinelProps.getNodes().isEmpty()) {
+            return buildSentinelFactory(sentinelProps);
+        }
+        return buildStandaloneFactory();
+    }
 
-        // 비밀번호가 설정된 경우만 적용
-        if (redisPassword != null && !redisPassword.isEmpty()) {
-            redisStandaloneConfiguration.setPassword(redisPassword);
+    private LettuceConnectionFactory buildSentinelFactory(RedisProperties.Sentinel sentinelProps) {
+        RedisSentinelConfiguration config = new RedisSentinelConfiguration(
+            sentinelProps.getMaster(),
+            new HashSet<>(sentinelProps.getNodes())
+        );
+
+        String dataPassword = redisProperties.getPassword();
+        if (dataPassword != null && !dataPassword.isEmpty()) {
+            config.setPassword(dataPassword);
         }
 
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        String sentinelPassword = sentinelProps.getPassword();
+        if (sentinelPassword != null && !sentinelPassword.isEmpty()) {
+            config.setSentinelPassword(sentinelPassword);
+        }
+
+        return new LettuceConnectionFactory(config);
+    }
+
+    private LettuceConnectionFactory buildStandaloneFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(redisProperties.getHost());
+        config.setPort(redisProperties.getPort());
+
+        String password = redisProperties.getPassword();
+        if (password != null && !password.isEmpty()) {
+            config.setPassword(password);
+        }
+
+        return new LettuceConnectionFactory(config);
     }
 
     @Bean
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setEnableTransactionSupport(true);    // 트랜잭션 허용
+        redisTemplate.setEnableTransactionSupport(true);
         redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
 
-        // Key Serializer: 문자열
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
 
-        // Value Serializer: JSON 직렬화
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 
