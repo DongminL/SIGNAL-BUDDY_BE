@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BatchExecutionId {
 
+    private Long jobInstanceId;
     private Long jobExecutionId;
     private Long stepExecutionId;
 }

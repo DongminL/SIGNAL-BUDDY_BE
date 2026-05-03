@@ -60,4 +60,30 @@ public class BatchJdbcRepository {
             }
         });
     }
+
+    /**
+     * JOB_INSTANCE_ID로 BATCH_JOB_INSTANCE 데이터를 벌크 연산으로 삭제
+     *
+     * @param batchTableName 삭제할 배치 테이블명
+     * @param executionIds  JOB_INSTANCE_ID 목록
+     */
+    public void deleteAllByJobInstanceIdInBatch(String batchTableName, List<BatchExecutionId> executionIds) {
+        String sql = "DELETE FROM " + batchTableName
+            + " WHERE JOB_INSTANCE_ID = ?"
+            + " AND NOT EXISTS (SELECT 1 FROM BATCH_JOB_EXECUTION WHERE JOB_INSTANCE_ID = ?)";
+
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Long jobInstanceId = executionIds.get(i).getJobInstanceId();
+                ps.setLong(1, jobInstanceId);
+                ps.setLong(2, jobInstanceId);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return executionIds.size();
+            }
+        });
+    }
 }
